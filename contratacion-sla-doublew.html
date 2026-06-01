@@ -197,5 +197,68 @@ function renderPrintContract(data){const node=document.getElementById('printCont
 <section class="print-section compact"><h2><span class="print-code">ESG</span> Compromiso ESG</h2><p class="print-muted">Nuestra propuesta es compatible con políticas ESG: activa físicamente a los usuarios, reduce la huella logística frente a otras activaciones masivas, y conecta los valores de salud, movimiento y deporte con la imagen de la empresa.</p><div class="print-esg"><div class="print-esg-card"><strong>Environmental</strong><p>Reduce la huella logística y de materiales frente a activaciones físicas tradicionales.</p></div><div class="print-esg-card"><strong>Social</strong><p>Activa físicamente a los participantes. Deporte, movimiento y bienestar como experiencia colectiva.</p></div><div class="print-esg-card"><strong>Governance</strong><p>Argumento sólido para comités de aprobación y políticas corporativas de responsabilidad.</p></div></div><div class="print-footer">Documento generado desde el formulario de contratación SLA DOUBLEW. Sostenible · Saludable · Fundación VirtualSports.</div></section>`}
 function render(){updateVisibility();const data=compute();document.getElementById('modelName').textContent=data.isDaily?'Facturación diaria':'Facturación semestral';document.getElementById('baseAmount').textContent=EUR.format(data.base);document.getElementById('extrasAmount').textContent=EUR.format(data.extras);document.getElementById('subtotalAmount').textContent=EUR.format(data.subtotal);document.getElementById('taxAmount').textContent=EUR.format(data.tax);document.getElementById('totalAmount').textContent=EUR.format(data.total);document.getElementById('printModelName').textContent=data.isDaily?'Facturación diaria':'Facturación semestral';document.getElementById('printBaseAmount').textContent=EUR.format(data.base);document.getElementById('printExtrasAmount').textContent=EUR.format(data.extras);document.getElementById('printSubtotalAmount').textContent=EUR.format(data.subtotal);document.getElementById('printTaxAmount').textContent=EUR.format(data.tax);document.getElementById('printTotalAmount').textContent=EUR.format(data.total);const pills=[];pills.push(data.isDaily?`${data.days} día(s)`:`${data.packs*10} h incluidas`);if(data.extraHours)pills.push(`${data.extraHours} h ampliadas`);if(data.onsite)pills.push('Presencial');if(data.urgent)pills.push('Urgente');if(data.weekend)pills.push('Fuera de horario');if(data.eventSupport)pills.push('Evento');document.getElementById('summaryPills').innerHTML=pills.map(p=>`<span class="pill">${p}</span>`).join('');syncSignatureFields();const summary=buildSummary(data);document.getElementById('contractText').textContent=summary;document.getElementById('mailBtn').href=`mailto:soporte@doublew.group?subject=${encodeURIComponent('Contratación SLA DOUBLEW - '+(value('clientCompany')||'cliente'))}&body=${encodeURIComponent(summary)}`;persistSlaTransfer(data);renderPrintContract(data)}fields.forEach(field=>field.addEventListener('input',render));fields.forEach(field=>field.addEventListener('change',render));document.getElementById('printBtn').addEventListener('click',()=>{try{renderPrintContract(compute())}catch(e){console.error('No se pudo actualizar el documento imprimible',e)}setTimeout(()=>window.print(),0)});document.getElementById('copyBtn').addEventListener('click',async()=>{const text=document.getElementById('contractText').textContent,btn=document.getElementById('copyBtn'),old=btn.textContent;try{await navigator.clipboard.writeText(text)}catch(e){const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.left='-9999px';document.body.appendChild(area);area.focus();area.select();document.execCommand('copy');area.remove()}btn.textContent='Resumen copiado';setTimeout(()=>btn.textContent=old,1600)});['startDate','signClientDate','signProviderDate'].forEach(id=>{const node=document.getElementById(id);if(node)node.valueAsDate=new Date()});try{render()}catch(e){console.error('No se pudo completar la actualización inicial',e)}
 </script>
+<script>
+// ============ Integración con CRM (cuando se abre en iframe) ============
+// Cuando esta página se carga dentro de un iframe del CRM:
+//   1. Prepobla el formulario desde URLSearchParams (para reabrir un SLA guardado).
+//   2. Añade un botón "Guardar en CRM" en la zona de acciones.
+//   3. Al pulsarlo, postMessage al parent con la URL canónica que reabre este mismo SLA.
+(function(){
+  if (window.parent === window) return; // standalone: no hace nada
+
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.toString()) {
+      params.forEach(function(val, key){
+        if (key === 'plan') {
+          var r = document.querySelector('input[name="plan"][value="'+val+'"]');
+          if (r) r.checked = true;
+        } else if (key === 'paymentTerms') {
+          var r2 = document.querySelector('input[name="paymentTerms"][value="'+CSS.escape(val)+'"]');
+          if (r2) r2.checked = true;
+        } else {
+          var node = document.getElementById(key);
+          if (node && 'value' in node) node.value = val;
+        }
+      });
+      if (typeof render === 'function') { try { render(); } catch(e) { console.error('[sla-iframe] re-render', e); } }
+    }
+  } catch (e) { console.error('[sla-iframe] prefill failed', e); }
+
+  var actions = document.querySelector('.actions');
+  if (!actions) return;
+  var btn = document.createElement('button');
+  btn.id = 'saveCrmBtn';
+  btn.className = 'primary';
+  btn.type = 'button';
+  btn.style.marginTop = '8px';
+  btn.style.width = '100%';
+  btn.textContent = 'Guardar en CRM';
+  actions.appendChild(btn);
+
+  btn.addEventListener('click', function(){
+    try {
+      var data = compute();
+      var payload = slaTransferData(data);
+      var query = new URLSearchParams(payload);
+      var url = location.origin + location.pathname + '?' + query.toString();
+      window.parent.postMessage({
+        type: 'sla_saved',
+        url: url,
+        updated_at: new Date().toISOString(),
+        clientCompany: payload.clientCompany || '',
+        plan: payload.plan || '',
+        total: payload.total || ''
+      }, 'https://softwowinx.github.io');
+      var old = btn.textContent;
+      btn.textContent = 'Guardado en CRM ✓';
+      setTimeout(function(){ btn.textContent = old; }, 1800);
+    } catch (e) {
+      console.error('[sla-iframe] save failed', e);
+      alert('No se pudo guardar en el CRM: ' + e.message);
+    }
+  });
+})();
+</script>
 </body>
 </html>
