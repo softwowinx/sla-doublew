@@ -11,6 +11,19 @@
   var _opportunityId = null;    // ref. suelta al CRM
   var _contactId = null;
 
+  // Snapshot de sesión: conserva el proyecto en curso (datos + selección del desplegable)
+  // al navegar entre páginas o refrescar, hasta que se elija otro o se pulse "Nuevo".
+  var SNAP_KEY = 'doublew_sla_session';
+  function saveSnapshot() {
+    try {
+      localStorage.setItem(SNAP_KEY, JSON.stringify({
+        id: _currentId, code: _currentCode, opp: _opportunityId,
+        contact: _contactId, state: serializeSlaState()
+      }));
+    } catch (e) {}
+  }
+  function clearSnapshot() { try { localStorage.removeItem(SNAP_KEY); } catch (e) {} }
+
   // ---- usuario por nombre (sin login real, como Define-y-Firma) ----
   function currentUser() {
     try {
@@ -138,6 +151,7 @@
     _currentId = null; _opportunityId = null; _contactId = null;
     setCode(generateSlaCode());
     try { localStorage.removeItem('doublew_sla_contract'); } catch (e) {}
+    clearSnapshot();
     var sel = document.getElementById('slaLoad'); if (sel) sel.value = '';
     if (typeof render === 'function') { try { render(); } catch (e) {} }
     setStatus('Nuevo SLA');
@@ -202,25 +216,48 @@
             a.href = 'control-seguimiento-sla-doublew.html?id=' + _currentId;
           });
         }
+        saveSnapshot();
       };
     }
 
-    refreshDropdown();
-
     var id = params.get('id');
+    var hasOtherParams = !id && !!window.location.search && window.location.search !== '?';
+
     if (id) {
-      // abrir un SLA existente por id (sobrescribe cualquier prefill)
+      // Abrir un SLA existente por id (sobrescribe cualquier prefill/snapshot).
       getProject(id).then(function (row) {
-        if (!row) { setStatus('SLA no encontrado', true); return; }
+        if (!row) { setStatus('SLA no encontrado', true); refreshDropdown(); return; }
         _currentId = row.id;
         _opportunityId = row.opportunity_id || _opportunityId;
         _contactId = row.contact_id || _contactId;
         setCode(row.sla_code);
         deserializeSlaState(row.state);
-        var s = document.getElementById('slaLoad'); if (s) s.value = row.id;
+        refreshDropdown(row.id);
       });
-    } else {
+    } else if (hasOtherParams) {
+      // Prefill desde el CRM (clientCompany, opportunity_id, etc.): lo gestionan los bloques
+      // de prefill existentes; aquí solo asignamos código nuevo y poblamos el desplegable.
       setCode(generateSlaCode());
+      refreshDropdown();
+    } else {
+      // Entrada normal (volver desde Seguimiento, refrescar): restaura el proyecto en curso
+      // (datos + selección del desplegable) hasta que se elija otro o se pulse "Nuevo".
+      // Solo en standalone: dentro del iframe del CRM, una apertura sin id debe salir en blanco.
+      var snap = null;
+      if (window.parent === window) {
+        try { snap = JSON.parse(localStorage.getItem(SNAP_KEY) || 'null'); } catch (e) {}
+      }
+      if (snap && snap.state) {
+        _currentId = snap.id || null;
+        _opportunityId = snap.opp || null;
+        _contactId = snap.contact || null;
+        setCode(snap.code || generateSlaCode());
+        deserializeSlaState(snap.state);
+        refreshDropdown(_currentId);
+      } else {
+        setCode(generateSlaCode());
+        refreshDropdown();
+      }
     }
   }
 

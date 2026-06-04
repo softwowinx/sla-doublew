@@ -156,6 +156,11 @@
     if (!id) return; // sin id: comportamiento demo del inline (localStorage/URL)
     _slaId = id;
     wire();
+    // el enlace "Contratación" de la cabecera debe reabrir ESTE mismo SLA
+    document.querySelectorAll('a[href^="contratacion-sla-doublew.html"]').forEach(function (a) {
+      a.href = 'contratacion-sla-doublew.html?id=' + _slaId;
+    });
+
     getProject(id).then(function (row) {
       if (!row) { console.warn('SLA no encontrado:', id); return; }
       fillContract(row);
