@@ -253,6 +253,18 @@
   .print-esg-card strong{color:#0c7c7c!important}
   .print-footer{border-top:1px solid #d9dee8!important;color:#667085!important;padding-top:2mm!important;margin-top:3mm!important}
 }
+/* secciones colapsables (Anexos / ESG) */
+details.collapsible{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+details.collapsible>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;padding:18px 22px}
+details.collapsible>summary::-webkit-details-marker{display:none}
+details.collapsible>summary h2{font-size:21px;margin:0}
+details.collapsible>summary small{color:var(--muted);font-weight:800;font-size:13px}
+details.collapsible>summary .chev{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-size:16px;line-height:1;transition:transform .2s ease,background .15s ease}
+details.collapsible>summary:hover .chev{background:#0a6a6a}
+details.collapsible>summary:hover{background:#f6fafb}
+details.collapsible[open]>summary .chev{transform:rotate(180deg)}
+details.collapsible[open]>summary{border-bottom:1px solid var(--line)}
+details.collapsible>.body{padding:22px}
 </style>
 </head>
 <body>
@@ -273,8 +285,8 @@
 <section class="contract-block" id="datos-firma"><div class="section-title"><h2><span class="section-code">§ 03</span> Aprobación y firma</h2><small>Datos de firma</small></div><p class="signature-intro">Al firmar este documento, ambas partes confirman haber leído, entendido y aceptado el modelo SLA seleccionado, sus anexos, condiciones de facturación, alcance, exclusiones y procedimiento de soporte. Cualquier modificación posterior deberá constar por escrito y ser aceptada por ambas partes.</p><div class="signature-grid"><div class="signature-card"><h3>Firma Cliente / Agencia</h3><div class="signature-fields"><div><label for="signClientName">Nombre completo</label><input id="signClientName" readonly></div><div><label for="signClientId">DNI / NIF</label><input id="signClientId" readonly></div><div><label for="signClientRole">Cargo</label><input id="signClientRole" readonly></div><div><label for="signClientCompany">Empresa</label><input id="signClientCompany" readonly></div><div><label for="signClientTaxId">CIF / NIF Empresa</label><input id="signClientTaxId" readonly></div><div><label for="signClientFinal">Cliente final (si difiere)</label><input id="signClientFinal" readonly></div><div><label for="signClientEmail">Email del firmante</label><input id="signClientEmail" readonly></div><p class="signature-confirm">Confirmo que estoy autorizado/a para obligar contractualmente a la empresa indicada y que acepto las condiciones de este documento.</p><div class="sig-wrap"><div><label for="signClientDate">Fecha</label><input id="signClientDate" type="date"></div><div><label>Firma</label><div class="sig-box"></div></div></div></div></div><div class="signature-card"><h3>Firma Proveedor</h3><div class="signature-fields"><div><label for="signProviderName">Nombre completo</label><input id="signProviderName" readonly></div><div><label for="signProviderId">DNI / NIF</label><input id="signProviderId" readonly></div><div><label for="signProviderRole">Cargo</label><input id="signProviderRole" readonly></div><div><label for="signProviderCompany">Empresa</label><input id="signProviderCompany" readonly></div><div><label for="signProviderTaxId">CIF / NIF Empresa</label><input id="signProviderTaxId" readonly></div><div><label for="signProviderEmail">Email del firmante</label><input id="signProviderEmail" readonly></div><p class="signature-confirm">Confirmo que estoy autorizado/a para obligar contractualmente a la empresa indicada y que acepto las condiciones descritas.</p><div class="sig-wrap"><div><label for="signProviderDate">Fecha</label><input id="signProviderDate" type="date"></div><div><label>Firma</label><div class="sig-box"></div></div></div></div></div></div><p class="readonly-note">Los datos de firma se completan automáticamente desde “Partes firmantes”.</p></section>
 
 
-<section class="annex-summary" id="anexos-condiciones"><div class="section-title"><h2><span class="section-code">§ 04</span> Anexos y condiciones complementarias</h2><small>Resumen contractual aplicable</small></div><div class="annex-grid"><div class="annex-card"><h3>Anexo diario · Soporte en días de activación</h3><ul><li>El soporte ordinario se presta de lunes a viernes de 10:00 a 18:00 CET, excluidos festivos en España.</li><li>Las ampliaciones de horario, nocturnos, fines de semana o festivos requieren solicitud escrita con al menos 7 días naturales de antelación.</li><li>La ampliación está sujeta a disponibilidad del equipo de DOUBLEW y confirmación expresa por escrito.</li><li>Coste de ampliación: 25 €/hora en día laborable y 40 €/hora en festivo o fin de semana + IVA.</li><li>La cobertura del SLA diario es íntegramente remota.</li></ul></div><div class="annex-card"><h3>Calendario laboral único aplicable</h3><ul><li>Los sábados y domingos se consideran no laborables.</li><li>Se aplica un único calendario laboral DOUBLEW para 2025 y 2026, con festivos nacionales, autonómicos y locales de Madrid.</li><li>El calendario afecta a disponibilidad, tiempos de respuesta, tiempos de resolución y cómputo de plazos SLA.</li><li>Festivos locales contemplados: San Isidro y Almudena según el año correspondiente.</li></ul></div><div class="annex-card wide"><h3>Condiciones generales de anexos</h3><ul><li>Las asistencias pueden ser realizadas por DOUBLEW o terceros autorizados por DOUBLEW.</li><li>El CLIENTE debe estar al corriente de pago y facilitar los datos necesarios para el cobro o facturación.</li><li>Las horas fuera de horario laboral se contabilizan como fuera de horario.</li><li>Formaciones, entrenamientos, puestas en marcha personalizadas, software de terceros o modificaciones del CLIENTE requieren valoración o presupuesto específico.</li><li>Estos anexos forman parte integral del SLA y sustituyen acuerdos anteriores sobre las condiciones aquí descritas.</li></ul></div></div></section>
-<section class="esg-section" id="compromiso-esg"><div class="section-title"><h2><span class="section-code">ESG</span> Compromiso ESG</h2><small>Environmental · Social · Governance</small></div><p class="esg-intro">Nuestra propuesta es compatible con políticas ESG: activa físicamente a los usuarios, reduce la huella logística frente a otras activaciones masivas, y conecta los valores de <strong>salud, movimiento y deporte</strong> con la imagen de la empresa.</p><div class="esg-grid"><div class="esg-card"><span class="esg-letter">E</span><h3>Environmental</h3><p>Reduce la huella logística y de materiales frente a activaciones físicas tradicionales.</p></div><div class="esg-card"><span class="esg-letter">S</span><h3>Social</h3><p>Activa físicamente a los participantes. Deporte, movimiento y bienestar como experiencia colectiva.</p></div><div class="esg-card"><span class="esg-letter">G</span><h3>Governance</h3><p>Argumento sólido para comités de aprobación y políticas corporativas de responsabilidad.</p></div></div><div class="esg-badges"><span class="esg-badge">Sostenible</span><span class="esg-badge">Saludable</span><span class="esg-badge">Fundación VirtualSports</span></div></section>
+<details class="collapsible annex-summary" id="anexos-condiciones"><summary><h2><span class="section-code">§ 04</span> Anexos y condiciones complementarias</h2><small>Resumen contractual aplicable</small><span class="chev" aria-hidden="true">▾</span></summary><div class="body"><div class="annex-grid"><div class="annex-card"><h3>Anexo diario · Soporte en días de activación</h3><ul><li>El soporte ordinario se presta de lunes a viernes de 10:00 a 18:00 CET, excluidos festivos en España.</li><li>Las ampliaciones de horario, nocturnos, fines de semana o festivos requieren solicitud escrita con al menos 7 días naturales de antelación.</li><li>La ampliación está sujeta a disponibilidad del equipo de DOUBLEW y confirmación expresa por escrito.</li><li>Coste de ampliación: 25 €/hora en día laborable y 40 €/hora en festivo o fin de semana + IVA.</li><li>La cobertura del SLA diario es íntegramente remota.</li></ul></div><div class="annex-card"><h3>Calendario laboral único aplicable</h3><ul><li>Los sábados y domingos se consideran no laborables.</li><li>Se aplica un único calendario laboral DOUBLEW para 2025 y 2026, con festivos nacionales, autonómicos y locales de Madrid.</li><li>El calendario afecta a disponibilidad, tiempos de respuesta, tiempos de resolución y cómputo de plazos SLA.</li><li>Festivos locales contemplados: San Isidro y Almudena según el año correspondiente.</li></ul></div><div class="annex-card wide"><h3>Condiciones generales de anexos</h3><ul><li>Las asistencias pueden ser realizadas por DOUBLEW o terceros autorizados por DOUBLEW.</li><li>El CLIENTE debe estar al corriente de pago y facilitar los datos necesarios para el cobro o facturación.</li><li>Las horas fuera de horario laboral se contabilizan como fuera de horario.</li><li>Formaciones, entrenamientos, puestas en marcha personalizadas, software de terceros o modificaciones del CLIENTE requieren valoración o presupuesto específico.</li><li>Estos anexos forman parte integral del SLA y sustituyen acuerdos anteriores sobre las condiciones aquí descritas.</li></ul></div></div></div></details>
+<details class="collapsible esg-section" id="compromiso-esg"><summary><h2><span class="section-code">ESG</span> Compromiso ESG</h2><small>Environmental · Social · Governance</small><span class="chev" aria-hidden="true">▾</span></summary><div class="body"><p class="esg-intro">Nuestra propuesta es compatible con políticas ESG: activa físicamente a los usuarios, reduce la huella logística frente a otras activaciones masivas, y conecta los valores de <strong>salud, movimiento y deporte</strong> con la imagen de la empresa.</p><div class="esg-grid"><div class="esg-card"><span class="esg-letter">E</span><h3>Environmental</h3><p>Reduce la huella logística y de materiales frente a activaciones físicas tradicionales.</p></div><div class="esg-card"><span class="esg-letter">S</span><h3>Social</h3><p>Activa físicamente a los participantes. Deporte, movimiento y bienestar como experiencia colectiva.</p></div><div class="esg-card"><span class="esg-letter">G</span><h3>Governance</h3><p>Argumento sólido para comités de aprobación y políticas corporativas de responsabilidad.</p></div></div><div class="esg-badges"><span class="esg-badge">Sostenible</span><span class="esg-badge">Saludable</span><span class="esg-badge">Fundación VirtualSports</span></div></div></details>
 <div id="contractText" class="output" hidden></div>
 </div><aside class="summary"><h2>Importe estimado</h2><div id="modelName" class="badge" style="background:#16212f;border:0">Facturación diaria</div><div class="pill-list" id="summaryPills"></div><div class="totals"><div id="breakdownLines"></div><div class="total-line"><span>Subtotal</span><strong id="subtotalAmount">80,00 €</strong></div><div class="total-line"><span>IVA 21%</span><strong id="taxAmount">16,80 €</strong></div><div class="total-line grand"><span>Total</span><span id="totalAmount">96,80 €</span></div></div><p class="legal">Importe orientativo basado en las condiciones de los documentos SLA aportados.</p><div class="actions"><button class="primary" id="printBtn" type="button">Imprimir / guardar PDF</button><button class="secondary" id="copyBtn" type="button">Copiar resumen</button><a class="button secondary" id="mailBtn" href="#">Preparar email</a></div></aside></div></main>
 <section id="printContract" class="print-contract" aria-label="Documento imprimible de contratación SLA DOUBLEW"></section>
@@ -446,6 +458,38 @@ function lineHtml(label,amount){return `<div class="total-line"><span>${label}</
       alert('No se pudo guardar en el CRM: ' + e.message);
     }
   });
+})();
+</script>
+<script>
+// ===== Restaurar estado en standalone (al volver desde Seguimiento, refrescar, etc.) =====
+// En iframe lo gestiona la integración CRM (lee la URL). Aquí, fuera de iframe, restauramos
+// desde la URL si la trae, y si no, desde localStorage (donde la contratación se autoguarda).
+(function(){
+  if (window.parent !== window) return; // dentro del iframe: no tocar
+  var data = null;
+  try {
+    var params = new URLSearchParams(location.search);
+    if (params.toString()) { data = {}; params.forEach(function(v,k){ data[k] = v; }); }
+    if (!data) { var s = localStorage.getItem('doublew_sla_contract'); if (s) data = JSON.parse(s); }
+  } catch (e) {}
+  if (!data) return;
+  try {
+    Object.keys(data).forEach(function(key){
+      var val = data[key];
+      if (val == null) return;
+      if (key === 'plan') {
+        var r = document.querySelector('input[name="plan"][value="'+val+'"]');
+        if (r) r.checked = true;
+      } else if (key === 'paymentTerms') {
+        var r2 = document.querySelector('input[name="paymentTerms"][value="'+CSS.escape(val)+'"]');
+        if (r2) r2.checked = true;
+      } else {
+        var node = document.getElementById(key);
+        if (node && 'value' in node) node.value = val;
+      }
+    });
+    if (typeof render === 'function') render();
+  } catch (e) { console.error('[sla-restore]', e); }
 })();
 </script>
 </body>
