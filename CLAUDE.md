@@ -8,7 +8,13 @@ Servir como herramienta de contratación de SLA. El comercial rellena el formula
 
 ## Última actualización
 
-**2026-06-01** — añadida integración con el CRM en `contratacion-sla-doublew.html` (commit `d121bc4`). Cuando la página se carga dentro de un iframe (`window.parent !== window`): (a) prepobla el formulario desde URLSearchParams, (b) añade un botón "Guardar en CRM" en `.actions`, (c) al pulsarlo emite postMessage `sla_saved` al parent con la URL canónica.
+**2026-06-04** — sesión amplia (commits `0a0c530`, `8aad269`, `0ae9831`). Tarifas diaria desdobladas (laborable 80 € / festivo-finde 160 €) y ampliación en dos tramos (25 €/40 €); eliminadas **todas** las referencias a servicios presenciales/desplazamiento/dietas/eventos; campo "Fecha fin"; dossier imprimible reescrito en **prosa** (omite campos vacíos, formato texto continuo); rediseño completo de la hoja de **Seguimiento** (datos solo-lectura desde contratación, incidencias colapsables con estado abierta/cerrada y tiempo auto-calculado, panel de consumo adaptativo diaria/semestral); secciones Anexos/ESG colapsables; persistencia del formulario vía localStorage al navegar. Narrativa completa en [docs/CHANGELOG.md](docs/CHANGELOG.md).
+
+## Modelo de tarifas (referencia)
+
+- **Diaria**: día laborable **80 €**, día festivo/fin de semana **160 €** (campos `activationDays`/`holidayDays`, por defecto 0). Ampliación de horario: **25 €/h** laborable, **40 €/h** festivo-finde (`extraHours`/`holidayExtraHours`). IVA 21%.
+- **Semestral**: paquete cerrado de 10 h por **600 €** (`hourPacks`), bolsa válida 6 meses. Clasificación de incidencias C1/C2/C3 + consulta.
+- **NO se presta servicio presencial** — el formulario, el resumen y el dossier no contienen tarifas presenciales, desplazamiento, dietas ni eventos. (Los `.docx` en `SLA docus/` todavía sí: pendiente actualizarlos — ver CHANGELOG.)
 
 ## Estructura
 
@@ -18,7 +24,12 @@ Servir como herramienta de contratación de SLA. El comercial rellena el formula
 - `css/` (vacío, estilos inline en el HTML).
 - `apple-touch-icon.png`, `favicon-192.png`, `favicon.ico`, `double_w_logo_blanco.png` — assets.
 
-Sin carpeta `js/` separada: todo el script vive embebido en `contratacion-sla-doublew.html` (líneas ~173 en adelante).
+Sin carpeta `js/` separada: todo el script vive embebido en cada HTML.
+
+- **`contratacion`**: `compute()` (cálculo), `breakdownHtml()` (desglose del resumen económico), `renderPrintContract()` (dossier en prosa), `slaTransferData()` (serialización), bloque iframe-CRM y bloque de restauración standalone (al final del `<body>`). Capas CSS de impresión `v6`→`v9` (la última, `print-text-v9`, fuerza el dossier a texto continuo).
+- **`control-seguimiento`**: `loadContractData()` (autorrelleno solo-lectura + cómputo de días/horas contratadas), `rowHtml()`/`rows()`/`render()` (tabla de incidencias como tarjetas colapsables), `summary()` (resumen que omite vacíos). Panel lateral adaptativo según modalidad.
+
+`SLA docus/` (sin versionar, solo local): plantillas `.docx`/`.xlsx` de contrato (no se suben — repo público).
 
 ## Contratos e interfaces
 
@@ -37,9 +48,11 @@ Origen target: `https://softwowinx.github.io`
 }
 ```
 
-### URL prefill (deep-link)
+### URL prefill / transferencia a Seguimiento
 
-Al cargar, lee `URLSearchParams` y prepobla los campos del formulario. Los radios `name="plan"` y `name="paymentTerms"` se setean por value; el resto se asigna como `value` al elemento con id == key.
+`slaTransferData()` serializa el state en query-string y `localStorage['doublew_sla_contract']`. Incluye, además de los campos del formulario: `plan`, `model`, `slaHours` (semestral), `activationDays`/`holidayDays` (diaria), `extraHours`/`holidayExtraHours`, `hourPacks`, `startDate`/`endDate`, `total`. **Seguimiento** lee estos campos (solo-lectura) para describir lo contratado y alimentar el panel de consumo.
+
+Al cargar: en **iframe** prepobla desde `URLSearchParams`; en **standalone** restaura desde URL o `localStorage` (radios `plan`/`paymentTerms` por value, resto por id==key). Esto persiste el formulario al navegar entre páginas o refrescar.
 
 ### Consumidor en el CRM
 
@@ -47,7 +60,7 @@ Al cargar, lee `URLSearchParams` y prepobla los campos del formulario. Los radio
 
 ## Estado de rama activa
 
-`main` en producción. Última feature: integración iframe.
+`main` en producción, sincronizada con `origin`. Todo lo de la sesión 2026-06-04 está desplegado. **Pendiente**: actualizar los `.docx` de `SLA docus/` para que cuadren con las tarifas nuevas y la eliminación de presencial; valorar botón "Nuevo/limpiar" en contratación (la persistencia hace que el form recuerde el último contrato, no arranca en blanco).
 
 ## Dependencias críticas
 
@@ -60,4 +73,4 @@ Sin build, sin npm, sin servidor. Abrir `contratacion-sla-doublew.html` en naveg
 
 ## Repo backup
 
-`delat0rre/sla-doublew-backup` (privado). Remoto `backup` en este clon. Reconciliable con `/session-sync-ecosystem` desde `CRM_OPPS`.
+`delat0rre/sla-doublew-backup` (privado) documentado como backup. **Atención:** en este clon `git remote` solo tiene `origin` (softwowinx/sla-doublew); el remoto `backup` **no está configurado**. Si se quiere backup, añadirlo con `git remote add backup <url>`. Reconciliable con `/session-sync-ecosystem` desde `CRM_OPPS`.
