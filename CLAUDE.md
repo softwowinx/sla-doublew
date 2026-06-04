@@ -4,11 +4,13 @@ App estática (vanilla HTML/JS, sin build) que genera contratos SLA con cálculo
 
 ## Propósito
 
-Servir como herramienta de contratación de SLA. El comercial rellena el formulario, calcula el importe, genera el contrato (PDF imprimible) y envía/firma. El **state se serializa íntegro en query-string** (sin Supabase ni BD): cada SLA "guardado" es una URL larga con todos los datos. Adicionalmente persiste en `localStorage` para conveniencia local.
+Servir como herramienta de contratación de SLA. El comercial rellena el formulario, calcula el importe, genera el contrato (PDF imprimible) y envía/firma. **Persistencia en Supabase dedicado** (modelo Define-y-Firma): cada SLA es una fila en `sla_projects` y se identifica por `?id=<uuid>`. Se conserva el `localStorage` y el prefill por query-string como conveniencia/retrocompatibilidad.
 
 ## Última actualización
 
-**2026-06-04** — sesión amplia (commits `0a0c530`, `8aad269`, `0ae9831`). Tarifas diaria desdobladas (laborable 80 € / festivo-finde 160 €) y ampliación en dos tramos (25 €/40 €); eliminadas **todas** las referencias a servicios presenciales/desplazamiento/dietas/eventos; campo "Fecha fin"; dossier imprimible reescrito en **prosa** (omite campos vacíos, formato texto continuo); rediseño completo de la hoja de **Seguimiento** (datos solo-lectura desde contratación, incidencias colapsables con estado abierta/cerrada y tiempo auto-calculado, panel de consumo adaptativo diaria/semestral); secciones Anexos/ESG colapsables; persistencia del formulario vía localStorage al navegar. Narrativa completa en [docs/CHANGELOG.md](docs/CHANGELOG.md).
+**2026-06-04 (b)** — **persistencia en Supabase**. Proyecto dedicado `sla-doublew` (ref `rrcwdlcoxlqemyzrnaln`, modelo Define-y-Firma). Tablas `sla_projects` (contrato en JSONB `state`) y `sla_incidents` (incidencias del seguimiento, con `data` jsonb sin pérdida), RLS `allow_all`. Nueva carpeta `js/` (`supabase-config.js`, `api.js`, `sla-persist.js`, `sla-seguimiento.js`). Barra superior en contratación (Cargar/Nuevo/Guardar), `postMessage` con **url corta por id**, seguimiento que lee de BD y persiste incidencias + notas. Diseño en [docs/superpowers/specs/2026-06-04-sla-persistencia-supabase-design.md](docs/superpowers/specs/2026-06-04-sla-persistencia-supabase-design.md). Detalle en [docs/CHANGELOG.md](docs/CHANGELOG.md).
+
+**2026-06-04 (a)** — sesión amplia (commits `0a0c530`, `8aad269`, `0ae9831`). Tarifas diaria desdobladas (laborable 80 € / festivo-finde 160 €) y ampliación en dos tramos (25 €/40 €); eliminadas **todas** las referencias a servicios presenciales/desplazamiento/dietas/eventos; campo "Fecha fin"; dossier imprimible reescrito en **prosa** (omite campos vacíos, formato texto continuo); rediseño completo de la hoja de **Seguimiento** (datos solo-lectura desde contratación, incidencias colapsables con estado abierta/cerrada y tiempo auto-calculado, panel de consumo adaptativo diaria/semestral); secciones Anexos/ESG colapsables; persistencia del formulario vía localStorage al navegar. Narrativa completa en [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 ## Modelo de tarifas (referencia)
 
@@ -24,7 +26,10 @@ Servir como herramienta de contratación de SLA. El comercial rellena el formula
 - `css/` (vacío, estilos inline en el HTML).
 - `apple-touch-icon.png`, `favicon-192.png`, `favicon.ico`, `double_w_logo_blanco.png` — assets.
 
-Sin carpeta `js/` separada: todo el script vive embebido en cada HTML.
+- `js/` — capa de persistencia Supabase: `supabase-config.js` (URL+anon del proyecto dedicado), `api.js` (CRUD `sla_projects`/`sla_incidents`), `sla-persist.js` (barra superior + serialización del contrato en contratación), `sla-seguimiento.js` (carga por `id` + incidencias en seguimiento).
+- `docs/schema.sql` — esquema de la BBDD. `.github/workflows/supabase-keepalive.yml` — ping cada 5 días (anti-hibernación).
+
+El resto del script de cada página sigue embebido inline en su HTML; solo la capa de BD vive en `js/`.
 
 - **`contratacion`**: `compute()` (cálculo), `breakdownHtml()` (desglose del resumen económico), `renderPrintContract()` (dossier en prosa), `slaTransferData()` (serialización), bloque iframe-CRM y bloque de restauración standalone (al final del `<body>`). Capas CSS de impresión `v6`→`v9` (la última, `print-text-v9`, fuerza el dossier a texto continuo).
 - **`control-seguimiento`**: `loadContractData()` (autorrelleno solo-lectura + cómputo de días/horas contratadas), `rowHtml()`/`rows()`/`render()` (tabla de incidencias como tarjetas colapsables), `summary()` (resumen que omite vacíos). Panel lateral adaptativo según modalidad.

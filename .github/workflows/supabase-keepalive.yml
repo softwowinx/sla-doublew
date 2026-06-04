@@ -1,0 +1,24 @@
+name: supabase-keepalive
+
+# Evita la hibernación del proyecto Supabase del SLA (plan free) con un ping cada 5 días.
+# La anon key es pública por diseño (ya va en js/supabase-config.js), por eso se embebe aquí.
+
+on:
+  schedule:
+    - cron: '0 8 */5 * *'   # cada 5 días a las 08:00 UTC
+  workflow_dispatch:        # lanzable a mano desde la pestaña Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        env:
+          URL: https://rrcwdlcoxlqemyzrnaln.supabase.co
+          ANON: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyY3dkbGNveGxxZW15enJuYWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODEzMTQsImV4cCI6MjA5NjE1NzMxNH0.eD3dLJyFuSyWf7F72fg3E8WSiJ4lPqc3cZs9Hrf_HEw
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+            "$URL/rest/v1/sla_projects?select=id&limit=1")
+          echo "HTTP $code"
+          test "$code" = "200"

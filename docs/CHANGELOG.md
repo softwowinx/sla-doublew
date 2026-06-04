@@ -4,7 +4,35 @@ Historial cronológico de sesiones (más reciente primero). La referencia establ
 
 ---
 
-## 2026-06-04 — Tarifas diaria, dossier en prosa, rediseño de Seguimiento y persistencia
+## 2026-06-04 (b) — Persistencia en Supabase (BBDD dedicada, modelo Define-y-Firma)
+
+Se dota a la app de **base de datos**. Hasta ahora el estado vivía solo en query-string + localStorage; ahora cada SLA es una fila en Supabase.
+
+### Decisión de arquitectura
+- **BBDD Supabase propia y dedicada** (no la del CRM). El usuario barajó alojarlo en la BBDD del CRM (patrón tabla `briefs`) pero se decidió por **proyecto dedicado replicando Define-y-Firma**. La similitud con DyF es la operativa de creación y el vínculo suelto a oportunidades/contactos; la topología es proyecto propio.
+- Proyecto creado vía **Management API REST** (el MCP de Supabase no carga en VSCode): `sla-doublew`, ref `rrcwdlcoxlqemyzrnaln`, org `xynjgywjidohnyxseylg` (la de DyF/CRM), región eu-west-2.
+- **RLS `allow_all`** (decisión explícita, modelo DyF). Riesgo asumido: cualquiera con la anon key pública puede volcar todas las filas. Alternativa (token por SLA) documentada como evolución futura.
+
+### Esquema (`docs/schema.sql`)
+- `sla_projects`: `id`, `sla_code` (`SLA-YYYYMM-XXXX`), `cliente`, `opportunity_id`/`contact_id` (ref. suelta texto), `plan`, `total`, `state` jsonb (contrato completo), `seguimiento_notes`, `created_by`/`updated_by`, timestamps.
+- `sla_incidents`: FK `sla_id` (ON DELETE CASCADE), `descripcion`, `solucion`, `estado`, `clasificacion`, `fecha_inicio`/`fecha_fin`, `minutos`, **`data` jsonb** (fila completa de la UI de 12 campos, sin pérdida), `created_by`, timestamps.
+- Triggers `updated_at`, índices por `sla_id`/`opportunity_id`. Verificado CRUD anónimo + cascade end-to-end vía REST.
+
+### Capa de app (nueva carpeta `js/`, patrón DyF)
+- `supabase-config.js` (URL+anon), `api.js` (CRUD de ambas tablas), `sla-persist.js` (contratación), `sla-seguimiento.js` (seguimiento).
+- **Contratación**: barra superior con desplegable **Cargar proyecto** + botones **Nuevo**/**Guardar** + código SLA visible. Serialización completa del formulario (`{fields, radios}`) a `state`. Identificación por nombre (sessionStorage). Al guardar: crea/actualiza, refleja `?id=` en la URL (history.replaceState) y refresca el desplegable.
+- **postMessage al CRM**: ahora envía **url corta `?id=<uuid>`** en vez de la query-string gigante (retrocompatible: el CRM solo lee `.url`). Se retiró el botón antiguo "Guardar en CRM" (url larga, sin BD); el guardado lo centraliza la barra superior. Se conserva el prefill por query-string para enlaces antiguos.
+- **Seguimiento**: si la URL trae `?id=`, carga "Lo contratado" + cliente/contacto desde `sla_projects` (solo lectura) e incidencias desde `sla_incidents`. Alta/edición (debounced ~700 ms) y baja persisten en BD; las notas de contacto van a `seguimiento_notes`. Sin `id`, mantiene el comportamiento demo (localStorage/URL).
+- `.github/workflows/supabase-keepalive.yml`: ping REST cada 5 días (anti-hibernación, plan free).
+
+### Pendiente / observaciones
+- 🟡 Validación visual en navegador real (creado y probado por API + syntax-check; falta el click-through de UI).
+- 🟡 El CRM (`CRM_OPPS`) podría adaptarse para abrir el SLA con `?id=` y/o listar SLA por `opportunity_id` (no imprescindible; el `postMessage` ya manda la url corta).
+- Seguridad: anon key pública en repo (por diseño Supabase) + RLS `allow_all` (riesgo asumido explícitamente).
+
+---
+
+## 2026-06-04 (a) — Tarifas diaria, dossier en prosa, rediseño de Seguimiento y persistencia
 
 Commits: `0a0c530` (contratación: tarifas/prosa/impresión), `8aad269` (seguimiento), `0ae9831` (contratación: colapsables + persistencia).
 
