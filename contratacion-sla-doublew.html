@@ -218,6 +218,7 @@
   .print-muted{color:#667085!important}
   /* párrafos de prosa */
   .print-para{margin:0 0 2.2mm!important;line-height:1.5!important;color:#19202a!important;font-size:9.3pt!important;text-align:justify!important}
+  .print-var{color:#0b0e13!important;font-weight:700!important}
   .print-para strong{color:#16212f!important;font-weight:850!important}
   /* campos como "Etiqueta: valor" en línea corrida */
   .print-grid,.print-grid.three{display:block!important}
@@ -303,15 +304,15 @@ const node=document.getElementById('printContract');if(!node)return;
 const isDaily=data.isDaily;
 const planTitle=isDaily?'SLA DOUBLEW, modalidad por días de activación':'SLA DOUBLEW, modalidad por bolsa semestral';
 const has=id=>!!value(id);
-const pv=id=>esc(value(id));
+const vv=x=>(x===''||x==null)?'':'<span class="print-var">'+x+'</span>';const money=n=>vv(esc(EUR.format(n)));const pv=id=>vv(esc(value(id)));
 const para=html=>html?`<p class="print-para">${html}</p>`:'';
 function party(comp,fallback,taxId,contact,role,email,phone,signerId,label){
-let s='<strong>'+(comp?esc(comp):fallback)+'</strong>';const b=[];
-if(taxId)b.push('con CIF/NIF '+esc(taxId));
-if(contact)b.push('representada por '+esc(contact)+(role?' ('+esc(role)+')':''));
-const cc=[];if(email)cc.push(esc(email));if(phone)cc.push(esc(phone));
+let s='<strong>'+(comp?vv(esc(comp)):fallback)+'</strong>';const b=[];
+if(taxId)b.push('con CIF/NIF '+vv(esc(taxId)));
+if(contact)b.push('representada por '+vv(esc(contact))+(role?' ('+vv(esc(role))+')':''));
+const cc=[];if(email)cc.push(vv(esc(email)));if(phone)cc.push(vv(esc(phone)));
 if(cc.length)b.push('con contacto en '+cc.join(' / '));
-if(signerId)b.push('firmante con DNI/NIF '+esc(signerId));
+if(signerId)b.push('firmante con DNI/NIF '+vv(esc(signerId)));
 if(b.length)s+=', '+b.join(', ');
 return s+' (en adelante, «'+label+'»)';
 }
@@ -330,35 +331,35 @@ modelo+='.';
 let operativa='';
 if(isDaily){
 const seg=[];
-if(data.workdays>0)seg.push(data.workdays+' día(s) laborable(s)');
-if(data.holidayDays>0)seg.push(data.holidayDays+' día(s) festivo(s) o de fin de semana');
+if(data.workdays>0)seg.push(vv(data.workdays)+' día(s) laborable(s)');
+if(data.holidayDays>0)seg.push(vv(data.holidayDays)+' día(s) festivo(s) o de fin de semana');
 operativa='Se contratan '+(seg.length?seg.join(' y '):'los días de activación indicados')+' de soporte';
 const amp=[];
-if(data.extraHours>0)amp.push(data.extraHours+' h de ampliación de horario en día laborable');
-if(data.holidayExtraHours>0)amp.push(data.holidayExtraHours+' h en festivo o fin de semana');
+if(data.extraHours>0)amp.push(vv(data.extraHours)+' h de ampliación de horario en día laborable');
+if(data.holidayExtraHours>0)amp.push(vv(data.holidayExtraHours)+' h en festivo o fin de semana');
 if(amp.length)operativa+=', con '+amp.join(' y ');
 operativa+='. El soporte ordinario se presta de lunes a viernes de 10:00 a 18:00 CET (excluidos festivos en España); las consultas se atienden por WhatsApp y las incidencias por teléfono durante los días contratados.';
 }else{
-operativa='Se contrata una bolsa cerrada de '+data.packs+' paquete(s) de 10 horas ('+(data.packs*10)+' h en total) de soporte técnico remoto, válida durante seis meses desde su formalización';
+operativa='Se contrata una bolsa cerrada de '+vv(data.packs)+' paquete(s) de 10 horas ('+vv(data.packs*10)+' h en total) de soporte técnico remoto, válida durante seis meses desde su formalización';
 const u=numberValue('expectedUse',0);
-if(u>0)operativa+=', con un uso estimado inicial de '+u+' h';
+if(u>0)operativa+=', con un uso estimado inicial de '+vv(u)+' h';
 operativa+='. El canal principal es soporte@doublew.group, admitiéndose escalado por WhatsApp o teléfono para incidencias críticas C1 según el procedimiento establecido.';
 }
-let economico='El importe estimado asciende a <strong>'+esc(EUR.format(data.total))+'</strong> (IVA 21% incluido). ';
+let economico='El importe estimado asciende a '+money(data.total)+' (IVA 21% incluido). ';
 if(isDaily){
 const segs=[];
-if(data.workdays>0)segs.push(data.workdays+' día(s) laborable(s) a 80 €');
-if(data.holidayDays>0)segs.push(data.holidayDays+' día(s) festivo(s) o de fin de semana a 160 €');
+if(data.workdays>0)segs.push(vv(data.workdays)+' día(s) laborable(s) a 80 €');
+if(data.holidayDays>0)segs.push(vv(data.holidayDays)+' día(s) festivo(s) o de fin de semana a 160 €');
 economico+='La modalidad diaria se factura por jornadas naturales de activación previamente notificadas: '+(segs.length?segs.join(' y '):'los días de activación indicados')+' (+ IVA)';
 const amp=[];
-if(data.extraHours>0)amp.push(data.extraHours+' h a 25 €/h en día laborable');
-if(data.holidayExtraHours>0)amp.push(data.holidayExtraHours+' h a 40 €/h en festivo o fin de semana');
+if(data.extraHours>0)amp.push(vv(data.extraHours)+' h a 25 €/h en día laborable');
+if(data.holidayExtraHours>0)amp.push(vv(data.holidayExtraHours)+' h a 40 €/h en festivo o fin de semana');
 if(amp.length)economico+=', más ampliación de horario de '+amp.join(' y ');
-economico+='. Resulta un SLA base de '+esc(EUR.format(data.base));
-if(data.extras>0)economico+=', extras por '+esc(EUR.format(data.extras));
-economico+=', un subtotal de '+esc(EUR.format(data.subtotal))+' y un IVA (21%) de '+esc(EUR.format(data.tax))+'. El servicio se presta de forma íntegramente remota dentro del horario definido (lunes a viernes de 10:00 a 18:00 CET, excluidos festivos en España).';
+economico+='. Resulta un SLA base de '+money(data.base);
+if(data.extras>0)economico+=', extras por '+money(data.extras);
+economico+=', un subtotal de '+money(data.subtotal)+' y un IVA (21%) de '+money(data.tax)+'. El servicio se presta de forma íntegramente remota dentro del horario definido (lunes a viernes de 10:00 a 18:00 CET, excluidos festivos en España).';
 }else{
-economico+='La modalidad semestral se contrata como bolsa cerrada de '+data.packs+' paquete(s) de 10 horas (600 € por paquete, '+(data.packs*10)+' h en total, + IVA), válida durante seis meses desde su formalización. Resulta un SLA base de '+esc(EUR.format(data.base))+', un subtotal de '+esc(EUR.format(data.subtotal))+' y un IVA (21%) de '+esc(EUR.format(data.tax))+'. Las horas de la bolsa solo pueden consumirse dentro del horario de servicio definido (lunes a viernes de 10:00 a 18:00 CET) y en días laborables en España; no admite ampliaciones ni horas extra, y las horas no son reembolsables ni transferibles y caducan al vencer la bolsa.';
+economico+='La modalidad semestral se contrata como bolsa cerrada de '+vv(data.packs)+' paquete(s) de 10 horas (600 € por paquete, '+vv(data.packs*10)+' h en total, + IVA), válida durante seis meses desde su formalización. Resulta un SLA base de '+money(data.base)+', un subtotal de '+money(data.subtotal)+' y un IVA (21%) de '+money(data.tax)+'. Las horas de la bolsa solo pueden consumirse dentro del horario de servicio definido (lunes a viernes de 10:00 a 18:00 CET) y en días laborables en España; no admite ampliaciones ni horas extra, y las horas no son reembolsables ni transferibles y caducan al vencer la bolsa.';
 }
 const fct=[];
 let f1=has('invoiceTo')?'La facturación se emitirá a nombre de '+pv('invoiceTo'):'La facturación se emitirá al Cliente';
@@ -372,7 +373,7 @@ const pay=[];
 if(has('paymentMode'))pay.push('modalidad '+pv('paymentMode'));
 if(has('paymentMethod'))pay.push('método '+pv('paymentMethod'));
 if(has('paymentDue'))pay.push('vencimiento '+pv('paymentDue'));
-if(radioValue('paymentTerms'))pay.push('condiciones '+esc(radioValue('paymentTerms')));
+if(radioValue('paymentTerms'))pay.push('condiciones '+vv(esc(radioValue('paymentTerms'))));
 if(pay.length)fct.push('Condiciones de pago: '+pay.join(', ')+'.');
 const bank=[];
 if(has('bankAccountHolder'))bank.push('titular '+pv('bankAccountHolder'));
@@ -384,19 +385,19 @@ if(bank.length)fct.push('Datos bancarios: '+bank.join(', ')+'.');
 if(has('billingNotes'))fct.push('Observaciones: '+pv('billingNotes')+'.');
 function signBlock(title,name,id,role,company,taxId,email,date){
 const idp=[];
-if(name)idp.push('<strong>'+esc(name)+'</strong>');
-if(role)idp.push(esc(role));
-if(company)idp.push(esc(company));
+if(name)idp.push('<strong>'+vv(esc(name))+'</strong>');
+if(role)idp.push(vv(esc(role)));
+if(company)idp.push(vv(esc(company)));
 const meta=[];
-if(id)meta.push('DNI/NIF '+esc(id));
-if(taxId)meta.push('CIF/NIF '+esc(taxId));
-if(email)meta.push(esc(email));
+if(id)meta.push('DNI/NIF '+vv(esc(id)));
+if(taxId)meta.push('CIF/NIF '+vv(esc(taxId)));
+if(email)meta.push(vv(esc(email)));
 let line=idp.join(', ');
 if(meta.length)line+=(line?' — ':'')+meta.join(' · ');
 return '<div class="print-sign-card"><h3>'+title+'</h3><div class="print-sign-body">'
 +(line?'<p class="print-para">'+line+'</p>':'')
 +'<div class="print-sign-label">Firma</div><div class="print-sign-line"></div>'
-+(date?'<p class="print-para">Fecha: '+esc(date)+'</p>':'')
++(date?'<p class="print-para">Fecha: '+vv(esc(date))+'</p>':'')
 +'</div></div>';
 }
 node.innerHTML=`
