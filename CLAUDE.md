@@ -8,6 +8,8 @@ Servir como herramienta de contratación de SLA. El comercial rellena el formula
 
 ## Última actualización
 
+**2026-06-06** — ajustes de contratación y mejora del PDF (commits `0ee4d33`, `441c262`). **Condiciones de pago** a dos opciones (eliminada "50% firma + 50% activación"). **Títulos de modalidad** renombrados a "Contratación por días" / "Paquete de horas" (tarjetas + `#printModelName`). **Aceptación de condiciones** fuera del formulario: ahora es una declaración del cliente en el PDF (§07). **Limpieza de código muerto presencial** en `compute()` (eliminada `onsiteRate()` y variables sin UI; cero cambio de cálculo). **Anexos** §04/§06: calendario "vigente" sin año fijo y redacción 100% remota. **Importes** con separador de miles correcto (`useGrouping:'always'`; Intl es-ES no agrupaba 4 dígitos). Wording **"Presupuesto total"** (no "estimado") en PDF y resumen. **§03 del PDF** reescrito de prosa a **desglose línea a línea**. Sin tocar Supabase (`js/`), integración CRM ni la fórmula de `compute()`. Detalle en [docs/CHANGELOG.md](docs/CHANGELOG.md).
+
 **2026-06-04 (b)** — **persistencia en Supabase**. Proyecto dedicado `sla-doublew` (ref `rrcwdlcoxlqemyzrnaln`, modelo Define-y-Firma). Tablas `sla_projects` (contrato en JSONB `state`) y `sla_incidents` (incidencias del seguimiento, con `data` jsonb sin pérdida), RLS `allow_all`. Nueva carpeta `js/` (`supabase-config.js`, `api.js`, `sla-persist.js`, `sla-seguimiento.js`). Barra superior en contratación (Cargar/Nuevo/Guardar), `postMessage` con **url corta por id**, seguimiento que lee de BD y persiste incidencias + notas. Diseño en [docs/superpowers/specs/2026-06-04-sla-persistencia-supabase-design.md](docs/superpowers/specs/2026-06-04-sla-persistencia-supabase-design.md). Detalle en [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 **2026-06-04 (a)** — sesión amplia (commits `0a0c530`, `8aad269`, `0ae9831`). Tarifas diaria desdobladas (laborable 80 € / festivo-finde 160 €) y ampliación en dos tramos (25 €/40 €); eliminadas **todas** las referencias a servicios presenciales/desplazamiento/dietas/eventos; campo "Fecha fin"; dossier imprimible reescrito en **prosa** (omite campos vacíos, formato texto continuo); rediseño completo de la hoja de **Seguimiento** (datos solo-lectura desde contratación, incidencias colapsables con estado abierta/cerrada y tiempo auto-calculado, panel de consumo adaptativo diaria/semestral); secciones Anexos/ESG colapsables; persistencia del formulario vía localStorage al navegar. Narrativa completa en [docs/CHANGELOG.md](docs/CHANGELOG.md).
@@ -65,7 +67,7 @@ Al cargar: en **iframe** prepobla desde `URLSearchParams`; en **standalone** res
 
 ## Estado de rama activa
 
-`main` en producción, sincronizada con `origin`. Todo lo de la sesión 2026-06-04 está desplegado. **Pendiente**: actualizar los `.docx` de `SLA docus/` para que cuadren con las tarifas nuevas y la eliminación de presencial; valorar botón "Nuevo/limpiar" en contratación (la persistencia hace que el form recuerde el último contrato, no arranca en blanco).
+`main` en producción, sincronizada con `origin` (último commit `441c262`, sesión 2026-06-06). Todo lo de las sesiones 2026-06-04 y 2026-06-06 está desplegado vía GitHub Pages. **Pendiente**: actualizar los `.docx` de `SLA docus/` para que cuadren con las tarifas nuevas y la eliminación de presencial; valorar botón "Nuevo/limpiar" en contratación (la persistencia hace que el form recuerde el último contrato, no arranca en blanco).
 
 ## Dependencias críticas
 

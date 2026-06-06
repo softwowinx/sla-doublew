@@ -4,20 +4,34 @@ Historial cronológico de sesiones (más reciente primero). La referencia establ
 
 ---
 
-## 2026-06-06 — Condiciones de pago: dos opciones
+## 2026-06-06 — Ajustes de contratación, limpieza remota y mejora del PDF
+
+Sesión de ajustes sobre la versión con persistencia Supabase. Commits `0ee4d33` (contenido + limpieza) y `441c262` (formato de importes + PDF). **Sin cambios** en la capa Supabase (`js/`), la integración CRM (`postMessage`/iframe) ni en la fórmula de `compute()`.
 
 ### Contratación (`contratacion-sla-doublew.html`)
-- Eliminada la opción **"50% firma + 50% activación"** del grupo de radios "Condiciones de pago" (`name="paymentTerms"`). Quedan solo **"Pago anticipado 100%"** (marcada por defecto) y **"Condición específica"**.
-- Restauración no tocada: las tres rutas (`prefill` iframe, standalone localStorage/URL y Supabase `state.radios` en `js/sla-persist.js`) ya toleran que el valor guardado no exista (`if (el) el.checked = true`); un proyecto antiguo con el valor 50% cae al default sin error. Sin cambios en la capa Supabase ni en `compute()`.
-- Resumen de texto: "Total estimado" → **"Presupuesto total"** (coherencia con el PDF).
-- PDF §03 Resumen económico: la prosa "de tirón" con todos los importes seguidos se sustituye por una **frase breve + desglose línea a línea** (concepto a la izquierda, importe a la derecha, con separador antes del Subtotal y "Presupuesto total" resaltado). Estilos inline con `!important` para sobrevivir a la capa de impresión que elimina bordes/fondos. Sin tocar el cálculo (las cifras salen de `compute()`).
-- Formato de importes: añadido `useGrouping:'always'` al formateador `EUR` (Intl es-ES no agrupaba los números de 4 dígitos; ahora 1.200,00 € / 1.452,00 €). Afecta a HTML, dossier PDF (`money()`) y resumen de texto, todos con el mismo objeto.
-- PDF: "Importe estimado" → **"Presupuesto total"** (subtítulo del Resumen económico, bloque solo-impresión) y prosa del dossier "El importe estimado asciende a…" → **"El presupuesto total asciende a…"** (es el total contratado, no una estimación).
-- Anexos / condiciones complementarias (formulario §04 y dossier §06): calendario laboral con año fijo "2025 y 2026" / "2025-2026" → **"calendario laboral oficial DOUBLEW vigente"** (sin año, no caduca). Y matiz de redacción 100% remota: "Las asistencias pueden ser realizadas…" → **"Los servicios de soporte pueden ser prestados…"**. No quedaban referencias presenciales (ya limpiadas en sesiones previas). Sin tocar Supabase ni integración CRM.
-- Limpieza de código muerto presencial en `compute()`: eliminada la función `onsiteRate()` y las variables sin UI (`onsite`, `urgent`, `weekend`, `eventSupport`, `onsiteHours`, `dietDays`, `eventDays`, `distanceRaw`/`distance`, `rate`, `onsiteCost`, `dietCost`, `eventCost`). `extras` pasa a ser `dailyExtras`. **Cero cambio de cálculo** (esos sumandos ya valían 0 al no existir sus inputs); subtotal/IVA/total idénticos. `weekend` era presencial-only (el festivo remoto vive en `holidayDays`/`holidayExtraHours`, intactos). Sin tocar `buildSummary`, `breakdownHtml`, dossier, serialización, Supabase ni integración CRM.
-- Aceptación de condiciones: eliminada la casilla `#acceptTerms` del formulario (sección "Condiciones y alcance"; Incluido/Excluido intactos). La aceptación queda reflejada en el PDF: el párrafo "al firmar… ambas partes confirman…" ya existía en §07 (no se duplica) y se añade la declaración del cliente ("El cliente declara conocer el alcance, las exclusiones, los canales, los horarios, la forma de cómputo y la ausencia de penalización automática salvo pacto escrito."). Limpiada la referencia muerta en `buildSummary` (línea "Aceptación de condiciones: Sí/Pendiente"). Serialización Supabase no tocada: era genérica por id, así que al quitar la casilla deja de guardarse y los proyectos antiguos restauran sin error (`getElementById` con guarda en `deserializeSlaState`).
-- Tarjeta "Paquete de horas" (semestral): el bullet de horario pasa de "Horario de uso limitado: lunes a viernes…" a **"Horario: lunes a viernes de 10:00 a 18:00 CET, no festivos."** (eliminado "de uso limitado").
-- Renombrados los títulos de las tarjetas de modalidad: **"Facturación diaria" → "Contratación por días"** y **"Facturación semestral" → "Paquete de horas"** (`<h3>`). Coherencia en el Resumen económico: actualizado el valor por defecto del HTML (`#printModelName`) y la asignación JS en `render()`. La etiqueta `model` ("SLA DOUBLEW - modalidad diaria/semestral") que viaja a Supabase/seguimiento/resumen de texto no se toca. Sin cambios en Supabase ni en `compute()`.
+
+**Formulario y textos**
+- **Condiciones de pago** reducidas a dos opciones: eliminada "50% firma + 50% activación" (`name="paymentTerms"`); quedan "Pago anticipado 100%" (por defecto) y "Condición específica".
+- **Títulos de modalidad** renombrados: "Facturación diaria" → **"Contratación por días"** y "Facturación semestral" → **"Paquete de horas"** (`<h3>` + valor por defecto y asignación JS de `#printModelName`). La etiqueta `model` ("SLA DOUBLEW - modalidad diaria/semestral") que viaja a Supabase/seguimiento se mantiene.
+- Tarjeta semestral: bullet de horario "Horario de uso limitado: …" → "Horario: lunes a viernes de 10:00 a 18:00 CET, no festivos." (eliminado "de uso limitado").
+- **Aceptación de condiciones**: eliminada la casilla `#acceptTerms` del formulario (listas Incluido/Excluido intactas). La aceptación queda en el PDF: el párrafo "al firmar… ambas partes confirman…" ya existía en §07 (no se duplica) y se añade la declaración del cliente ("El cliente declara conocer el alcance, las exclusiones, los canales, los horarios, la forma de cómputo y la ausencia de penalización automática salvo pacto escrito.").
+
+**Anexos / condiciones complementarias (§04 formulario y §06 dossier)**
+- Calendario laboral con año fijo ("2025 y 2026" / "2025-2026") → **"calendario laboral oficial DOUBLEW vigente"** (sin año, no caduca).
+- Redacción 100% remota: "Las asistencias pueden ser realizadas…" → "Los servicios de soporte pueden ser prestados…".
+
+**Limpieza de código muerto presencial en `compute()`**
+- Eliminada la función `onsiteRate()` y las variables sin UI (`onsite`, `urgent`, `weekend`, `eventSupport`, `onsiteHours`, `dietDays`, `eventDays`, `distance`/`distanceRaw`, `rate`, `onsiteCost`, `dietCost`, `eventCost`). `extras` pasa a ser `dailyExtras`. **Cero cambio de cálculo** (esos sumandos ya valían 0 al no existir sus inputs). `weekend` era presencial-only; el festivo remoto vive en `holidayDays`/`holidayExtraHours`, intactos.
+
+**Importes y PDF**
+- **Separador de miles**: añadido `useGrouping:'always'` al formateador `EUR` (Intl `es-ES` no agrupaba los números de 4 dígitos; ahora 1.200,00 € / 1.452,00 €). Afecta a HTML, dossier (`money()`) y resumen de texto (un único objeto `EUR`).
+- **"Presupuesto total"** en lugar de "estimado": subtítulo del Resumen económico (bloque solo-impresión), prosa del dossier ("El presupuesto total asciende a…") y línea del resumen de texto. Es el total contratado, no una estimación.
+- **§03 Resumen económico del PDF** reescrito: la prosa "de tirón" (todos los importes en una frase) se sustituye por una frase breve + **desglose línea a línea** (concepto a la izquierda, importe a la derecha, separador antes del Subtotal y "Presupuesto total" resaltado). Estilos inline con `!important` para sobrevivir a la capa de impresión que elimina bordes/fondos.
+
+### Notas técnicas
+- Restauración de `paymentTerms`: las tres rutas (prefill iframe, standalone localStorage/URL, Supabase `state.radios`) ya toleran que el valor guardado no exista (guarda `if (el)`); un proyecto antiguo con "50%" cae al default sin error.
+- `acceptTerms` viajaba a Supabase solo por serialización genérica (`state.fields` por id); al quitar la casilla deja de guardarse y los proyectos antiguos restauran sin error (`getElementById` con guarda en `deserializeSlaState`). No se tocó `js/`.
+- El bloque `#printEconomicSummary` (rejilla) está dentro de `<main>`, que en impresión se oculta (`body>main{display:none}`), por lo que no se imprime; el resumen económico del PDF lo aporta el dossier `#printContract`.
 
 ---
 
