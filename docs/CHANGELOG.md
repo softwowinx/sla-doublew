@@ -4,6 +4,19 @@ Historial cronológico de sesiones (más reciente primero). La referencia establ
 
 ---
 
+## 2026-06-06 — Condiciones de pago: dos opciones
+
+### Contratación (`contratacion-sla-doublew.html`)
+- Eliminada la opción **"50% firma + 50% activación"** del grupo de radios "Condiciones de pago" (`name="paymentTerms"`). Quedan solo **"Pago anticipado 100%"** (marcada por defecto) y **"Condición específica"**.
+- Restauración no tocada: las tres rutas (`prefill` iframe, standalone localStorage/URL y Supabase `state.radios` en `js/sla-persist.js`) ya toleran que el valor guardado no exista (`if (el) el.checked = true`); un proyecto antiguo con el valor 50% cae al default sin error. Sin cambios en la capa Supabase ni en `compute()`.
+- Anexos / condiciones complementarias (formulario §04 y dossier §06): calendario laboral con año fijo "2025 y 2026" / "2025-2026" → **"calendario laboral oficial DOUBLEW vigente"** (sin año, no caduca). Y matiz de redacción 100% remota: "Las asistencias pueden ser realizadas…" → **"Los servicios de soporte pueden ser prestados…"**. No quedaban referencias presenciales (ya limpiadas en sesiones previas). Sin tocar Supabase ni integración CRM.
+- Limpieza de código muerto presencial en `compute()`: eliminada la función `onsiteRate()` y las variables sin UI (`onsite`, `urgent`, `weekend`, `eventSupport`, `onsiteHours`, `dietDays`, `eventDays`, `distanceRaw`/`distance`, `rate`, `onsiteCost`, `dietCost`, `eventCost`). `extras` pasa a ser `dailyExtras`. **Cero cambio de cálculo** (esos sumandos ya valían 0 al no existir sus inputs); subtotal/IVA/total idénticos. `weekend` era presencial-only (el festivo remoto vive en `holidayDays`/`holidayExtraHours`, intactos). Sin tocar `buildSummary`, `breakdownHtml`, dossier, serialización, Supabase ni integración CRM.
+- Aceptación de condiciones: eliminada la casilla `#acceptTerms` del formulario (sección "Condiciones y alcance"; Incluido/Excluido intactos). La aceptación queda reflejada en el PDF: el párrafo "al firmar… ambas partes confirman…" ya existía en §07 (no se duplica) y se añade la declaración del cliente ("El cliente declara conocer el alcance, las exclusiones, los canales, los horarios, la forma de cómputo y la ausencia de penalización automática salvo pacto escrito."). Limpiada la referencia muerta en `buildSummary` (línea "Aceptación de condiciones: Sí/Pendiente"). Serialización Supabase no tocada: era genérica por id, así que al quitar la casilla deja de guardarse y los proyectos antiguos restauran sin error (`getElementById` con guarda en `deserializeSlaState`).
+- Tarjeta "Paquete de horas" (semestral): el bullet de horario pasa de "Horario de uso limitado: lunes a viernes…" a **"Horario: lunes a viernes de 10:00 a 18:00 CET, no festivos."** (eliminado "de uso limitado").
+- Renombrados los títulos de las tarjetas de modalidad: **"Facturación diaria" → "Contratación por días"** y **"Facturación semestral" → "Paquete de horas"** (`<h3>`). Coherencia en el Resumen económico: actualizado el valor por defecto del HTML (`#printModelName`) y la asignación JS en `render()`. La etiqueta `model` ("SLA DOUBLEW - modalidad diaria/semestral") que viaja a Supabase/seguimiento/resumen de texto no se toca. Sin cambios en Supabase ni en `compute()`.
+
+---
+
 ## 2026-06-04 (b) — Persistencia en Supabase (BBDD dedicada, modelo Define-y-Firma)
 
 Se dota a la app de **base de datos**. Hasta ahora el estado vivía solo en query-string + localStorage; ahora cada SLA es una fila en Supabase.
